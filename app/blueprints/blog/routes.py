@@ -43,7 +43,7 @@ def ensure_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT,
             content TEXT,
-            timestamp TEXT,
+            timestamp DATETIME,
             media TEXT
         )
         """
@@ -140,7 +140,7 @@ def new_post():
         try:
             ensure_db()
             conn = get_db_connection()
-            ts = datetime.utcnow().isoformat()
+            ts = datetime.now().strftime('%d.%m.%Y %H:%M')
             conn.execute(
                 "INSERT INTO posts (title, content, timestamp, media) VALUES (?, ?, ?, ?)",
                 (title, content, ts, media_field),

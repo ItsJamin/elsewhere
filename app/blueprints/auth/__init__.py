@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, current_app, session, flash
 
-auth_bp = Blueprint("auth", __name__, template_folder="templates/auth")
+# Mount auth routes under /blog so login becomes /blog/login
+auth_bp = Blueprint("auth", __name__, template_folder="templates/auth", url_prefix="/blog")
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
@@ -18,4 +19,4 @@ def login():
 @auth_bp.route("/logout")
 def logout():
     session.pop("admin", None)
-    return redirect(url_for("main.home"))
+    return redirect(url_for("blog.list_posts"))

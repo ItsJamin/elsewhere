@@ -21,11 +21,16 @@
             {% if post.title %}
               <h2>{{ post.title }}</h2>
             {% endif %}
-            <time datetime="{{ post.timestamp }}">{{ post.timestamp }}</time>
+            <div class="d-flex align-items-baseline gap-2">
+              <time datetime="{{ post.timestamp }}">{{ post.timestamp }}</time>
+              {% if post.latitude is not none and post.longitude is not none %}
+                <small class="text-muted">• {{ '%.5f'|format(post.latitude) }}, {{ '%.5f'|format(post.longitude) }}</small>
+              {% endif %}
+            </div>
           </header>
 
           <div class="post-content">
-            {{ post.content | e | replace('\n', '<br/>') | safe }}
+            {{ post.content | safe }}
           </div>
 
           {% if post.media %}

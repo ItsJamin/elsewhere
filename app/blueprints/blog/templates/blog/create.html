@@ -18,24 +18,62 @@
   {% endwith %}
 
   <form method="post" enctype="multipart/form-data" action="{{ url_for('blog.new_post') }}">
-    <div>
-      <label for="title">Title (optional)</label><br/>
-      <input id="title" name="title" type="text" maxlength="200" />
+    <div class="mb-3">
+      <label for="title" class="form-label">Title (optional)</label>
+      <input id="title" name="title" type="text" class="form-control" maxlength="200" />
     </div>
 
-    <div>
-      <label for="content">Content</label><br/>
-      <textarea id="content" name="content" rows="10" cols="60" required></textarea>
+    <div class="mb-3">
+      <label for="content" class="form-label">Content</label>
+      <textarea id="content" name="content" rows="10" class="form-control" required></textarea>
     </div>
 
-    <div>
-      <label for="media">Media (images / videos) — multiple allowed</label><br/>
-      <input id="media" name="media" type="file" multiple />
+    <div class="mb-3">
+      <label for="media" class="form-label">Media (images / videos / audio) — multiple allowed</label>
+      <input id="media" name="media" type="file" multiple class="form-control" />
     </div>
 
-    <div>
-      <button type="submit">Create</button>
-      <a href="{{ url_for('blog.list_posts') }}">Cancel</a>
+    <div class="row g-2 mb-3">
+      <!-- latitude/longitude are auto-filled via browser geolocation; left empty if permission denied -->
+      <input id="latitude" name="latitude" type="hidden" />
+      <input id="longitude" name="longitude" type="hidden" />
+      <div class="col-12">
+        <p id="location-info" class="form-text text-muted">Location: not provided</p>
+        <small class="text-muted">Coordinates are auto-filled from browser geolocation if permitted. They remain empty if permission is denied.</small>
+      </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var latInput = document.getElementById('latitude');
+      var lngInput = document.getElementById('longitude');
+      var info = document.getElementById('location-info');
+
+      if (!navigator.geolocation) {
+        info.textContent = 'Location: not available';
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(function(pos) {
+        var lat = pos.coords.latitude.toFixed(6);
+        var lng = pos.coords.longitude.toFixed(6);
+        latInput.value = lat;
+        lngInput.value = lng;
+        info.textContent = 'Location: ' + lat + ', ' + lng;
+      }, function(err) {
+        // permission denied or other error — leave inputs empty
+        info.textContent = 'Location: not provided';
+      }, {
+        enableHighAccuracy: false,
+        timeout: 10000,
+        maximumAge: 0
+      });
+    });
+    </script>
+
+    <div class="mb-3">
+      <button type="submit" class="btn btn-primary">Create</button>
+      <a href="{{ url_for('blog.list_posts') }}" class="btn btn-link">Cancel</a>
     </div>
   </form>
 {% endblock %}

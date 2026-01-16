@@ -117,7 +117,25 @@ footer {
   background: transparent;
 }
 
+/* Gallery tweaks */
+.post-media.gallery .media-item {
+  flex: 1 1 140px;
+  max-width: calc(33.333% - 0.5rem);
+}
+.post-media.gallery .gallery-image,
+.post-media.gallery .gallery-video {
+  height: 160px;
+  object-fit: cover;
+  width: 100%;
+}
+
+/* Single media prominence */
+.single-media { display:block; width:100%; height:auto; }
+
 /* Responsiveness */
+@media (max-width: 768px) {
+  .post-media.gallery .media-item { max-width: 50%; flex-basis: 50%; }
+}
 @media (max-width: 576px) {
   .post-media .media-item { max-width: 100%; flex-basis: 100%; }
 }

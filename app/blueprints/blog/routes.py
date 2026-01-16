@@ -54,7 +54,8 @@ def ensure_db():
             timestamp DATETIME,
             media TEXT,
             latitude REAL,
-            longitude REAL
+            longitude REAL,
+            deleted INTEGER DEFAULT 0
         )
         """
     )
@@ -72,6 +73,12 @@ def ensure_db():
     if "longitude" not in cols:
         try:
             cur.execute("ALTER TABLE posts ADD COLUMN longitude REAL")
+            conn.commit()
+        except Exception:
+            pass
+    if "deleted" not in cols:
+        try:
+            cur.execute("ALTER TABLE posts ADD COLUMN deleted INTEGER DEFAULT 0")
             conn.commit()
         except Exception:
             pass
@@ -97,7 +104,7 @@ def list_posts():
         ensure_db()
         conn = get_db_connection()
         cur = conn.execute(
-            "SELECT id, title, content, timestamp, media, latitude, longitude FROM posts ORDER BY timestamp DESC"
+            "SELECT id, title, content, timestamp, media, latitude, longitude FROM posts WHERE deleted IS NULL OR deleted = 0 ORDER BY timestamp DESC"
         )
         rows = cur.fetchall()
         for r in rows:
@@ -181,10 +188,8 @@ def new_post():
         for f in files:
             if f and f.filename:
                 filename = secure_filename(f.filename)
-                if not allowed_file(filename):
-                    # skip unknown extensions
-                    continue
-                # make filename unique
+                # Always save uploaded files; unsupported types will be offered as downloads.
+                # Keep client-side rendering limited to known image/video/audio types.
                 unique = f"{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{uuid.uuid4().hex}_{filename}"
                 dest_path = os.path.join(upload_folder, unique)
                 f.save(dest_path)
@@ -232,21 +237,10 @@ def delete_post(post_id):
         row = cur.fetchone()
         media_field = row["media"] if row else None
 
-        # delete DB row
-        conn.execute("DELETE FROM posts WHERE id = ?", (post_id,))
+        # soft-delete: mark as deleted (retain files on disk)
+        conn.execute("UPDATE posts SET deleted = 1 WHERE id = ?", (post_id,))
         conn.commit()
         conn.close()
-
-        # remove files from upload folder
-        if media_field:
-            upload_folder = current_app.config.get("UPLOAD_FOLDER")
-            for fname in media_field.split("||"):
-                try:
-                    path = os.path.join(upload_folder, fname)
-                    if os.path.exists(path):
-                        os.remove(path)
-                except Exception:
-                    pass
 
         flash("Post deleted", "info")
     except Exception:

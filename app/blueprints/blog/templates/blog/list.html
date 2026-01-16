@@ -35,30 +35,77 @@
 
           {% if post.media %}
             {% set files = post.media.split('||') %}
-            <div class="post-media {% if files|length == 1 %}single{% endif %}">
-              {% for f in files %}
+            {# Automatic media layout:
+               - single image -> prominent full-width image
+               - single video -> prominent full-width video
+               - single audio -> audio control
+               - multiple items -> gallery of previews (images/videos), unsupported files offered as downloads
+            #}
+            {% set first = files[0] %}
+            {% set lf0 = first.lower() %}
+            {% if files|length == 1 and (lf0.endswith('.mp4') or lf0.endswith('.webm') or lf0.endswith('.mov')) %}
+              <div class="post-media single">
                 <div class="media-item">
-                  {% set lf = f.lower() %}
-                  {% if lf.endswith('.mp4') or lf.endswith('.webm') or lf.endswith('.mov') %}
-                    <video controls preload="metadata" class="w-100">
-                      <source src="{{ url_for('blog.uploaded_file', filename=f) }}">
-                      Your browser does not support the video tag.
-                    </video>
-
-                  {% elif lf.endswith('.mp3') or lf.endswith('.wav') or lf.endswith('.m4a') or lf.endswith('.aac') or lf.endswith('.oga') or lf.endswith('.ogg') %}
-                    <audio controls class="w-100">
-                      <source src="{{ url_for('blog.uploaded_file', filename=f) }}">
-                      Your browser does not support the audio element.
-                    </audio>
-
-                  {% else %}
-                    <a href="{{ url_for('blog.uploaded_file', filename=f) }}" target="_blank" rel="noopener">
-                      <img src="{{ url_for('blog.uploaded_file', filename=f) }}" alt="media" class="img-fluid" />
-                    </a>
-                  {% endif %}
+                  <video controls preload="metadata" class="w-100">
+                    <source src="{{ url_for('blog.uploaded_file', filename=first) }}">
+                    Your browser does not support the video tag.
+                  </video>
                 </div>
-              {% endfor %}
-            </div>
+              </div>
+            {% elif files|length == 1 and (lf0.endswith('.mp3') or lf0.endswith('.wav') or lf0.endswith('.m4a') or lf0.endswith('.aac') or lf0.endswith('.oga') or lf0.endswith('.ogg')) %}
+              <div class="post-media single">
+                <div class="media-item">
+                  <audio controls class="w-100">
+                    <source src="{{ url_for('blog.uploaded_file', filename=first) }}">
+                    Your browser does not support the audio element.
+                  </audio>
+                </div>
+              </div>
+            {% elif files|length == 1 and (lf0.endswith('.png') or lf0.endswith('.jpg') or lf0.endswith('.jpeg') or lf0.endswith('.gif')) %}
+              <div class="post-media single">
+                <div class="media-item">
+                  <a href="{{ url_for('blog.uploaded_file', filename=first) }}" target="_blank" rel="noopener">
+                    <img src="{{ url_for('blog.uploaded_file', filename=first) }}" alt="media" class="img-fluid single-media" />
+                  </a>
+                </div>
+              </div>
+            {% elif files|length == 1 %}
+              {# single unsupported file -> offer download #}
+              <div class="post-media single">
+                <div class="media-item">
+                  <a href="{{ url_for('blog.uploaded_file', filename=first) }}" class="btn btn-outline-primary" download>
+                    Download {{ first }}
+                  </a>
+                </div>
+              </div>
+            {% else %}
+              <div class="post-media gallery">
+                {% for f in files %}
+                  <div class="media-item">
+                    {% set lf = f.lower() %}
+                    {% if lf.endswith('.mp4') or lf.endswith('.webm') or lf.endswith('.mov') %}
+                      <video controls preload="metadata" class="w-100 gallery-video">
+                        <source src="{{ url_for('blog.uploaded_file', filename=f) }}">
+                        Your browser does not support the video tag.
+                      </video>
+                    {% elif lf.endswith('.mp3') or lf.endswith('.wav') or lf.endswith('.m4a') or lf.endswith('.aac') or lf.endswith('.oga') or lf.endswith('.ogg') %}
+                      <audio controls class="w-100">
+                        <source src="{{ url_for('blog.uploaded_file', filename=f) }}">
+                        Your browser does not support the audio element.
+                      </audio>
+                    {% elif lf.endswith('.png') or lf.endswith('.jpg') or lf.endswith('.jpeg') or lf.endswith('.gif') %}
+                      <a href="{{ url_for('blog.uploaded_file', filename=f) }}" target="_blank" rel="noopener">
+                        <img src="{{ url_for('blog.uploaded_file', filename=f) }}" alt="media" class="img-fluid gallery-image" />
+                      </a>
+                    {% else %}
+                      <a href="{{ url_for('blog.uploaded_file', filename=f) }}" class="btn btn-outline-secondary" download>
+                        Download {{ f }}
+                      </a>
+                    {% endif %}
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
           {% endif %}
 
         </article>

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}New Post{% endblock %}
+
+{% block header %}<a href="{{ url_for('main.home') }}">Travel Blog</a>{% endblock %}
+
+{% block content %}
+  <h2>Create Post</h2>
+
+  {% with messages = get_flashed_messages(category_filter=["error", "info"]) %}
+    {% if messages %}
+      <ul class="flashes">
+        {% for m in messages %}
+          <li>{{ m }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <form method="post" enctype="multipart/form-data" action="{{ url_for('blog.new_post') }}">
+    <div>
+      <label for="title">Title (optional)</label><br/>
+      <input id="title" name="title" type="text" maxlength="200" />
+    </div>
+
+    <div>
+      <label for="content">Content</label><br/>
+      <textarea id="content" name="content" rows="10" cols="60" required></textarea>
+    </div>
+
+    <div>
+      <label for="media">Media (images / videos) — multiple allowed</label><br/>
+      <input id="media" name="media" type="file" multiple />
+    </div>
+
+    <div>
+      <button type="submit">Create</button>
+      <a href="{{ url_for('blog.list_posts') }}">Cancel</a>
+    </div>
+  </form>
+{% endblock %}

@@ -1,1 +1,3 @@
 __pycache__
+*.db
+ABOUT.md

@@ -8,32 +8,47 @@
   <section class="posts">
     {% if posts %}
       {% for post in posts %}
-        <article class="post">
+        <article class="post position-relative">
+          {% if session.get('admin') %}
+            <form method="post" action="{{ url_for('blog.delete_post', post_id=post.id) }}" class="position-absolute" style="top:0;right:0;">
+              <button type="submit" class="btn btn-danger btn-sm m-2" onclick="return confirm('Delete this post? This cannot be undone.')">
+                &times;
+              </button>
+            </form>
+          {% endif %}
+
           <header>
             {% if post.title %}
               <h2>{{ post.title }}</h2>
             {% endif %}
             <time datetime="{{ post.timestamp }}">{{ post.timestamp }}</time>
           </header>
+
           <div class="post-content">
             {{ post.content | e | replace('\n', '<br/>') | safe }}
           </div>
 
-          {# Media rendering: images open in new tab, videos use <video> player #}
           {% if post.media %}
             {% set files = post.media.split('||') %}
             <div class="post-media {% if files|length == 1 %}single{% endif %}">
               {% for f in files %}
                 <div class="media-item">
                   {% set lf = f.lower() %}
-                  {% if lf.endswith('.mp4') or lf.endswith('.webm') or lf.endswith('.ogg') or lf.endswith('.mov') %}
-                    <video controls preload="metadata">
+                  {% if lf.endswith('.mp4') or lf.endswith('.webm') or lf.endswith('.mov') %}
+                    <video controls preload="metadata" class="w-100">
                       <source src="{{ url_for('blog.uploaded_file', filename=f) }}">
                       Your browser does not support the video tag.
                     </video>
+
+                  {% elif lf.endswith('.mp3') or lf.endswith('.wav') or lf.endswith('.m4a') or lf.endswith('.aac') or lf.endswith('.oga') or lf.endswith('.ogg') %}
+                    <audio controls class="w-100">
+                      <source src="{{ url_for('blog.uploaded_file', filename=f) }}">
+                      Your browser does not support the audio element.
+                    </audio>
+
                   {% else %}
                     <a href="{{ url_for('blog.uploaded_file', filename=f) }}" target="_blank" rel="noopener">
-                      <img src="{{ url_for('blog.uploaded_file', filename=f) }}" alt="media" />
+                      <img src="{{ url_for('blog.uploaded_file', filename=f) }}" alt="media" class="img-fluid" />
                     </a>
                   {% endif %}
                 </div>
@@ -44,7 +59,7 @@
         </article>
       {% endfor %}
     {% else %}
-      <p>Bisher keine Beiträge.</p>
+      <p>No posts yet.</p>
     {% endif %}
   </section>
 

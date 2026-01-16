@@ -25,6 +25,11 @@ ALLOWED_EXTENSIONS = set(
         "webm",
         "ogg",
         "mov",
+        "wav",
+        "mp3",
+        "m4a",
+        "aac",
+        "oga",
     ]
 )
 
@@ -155,5 +160,44 @@ def new_post():
                 conn.close()
             except Exception:
                 pass
-
+    
     return render_template("create.html")
+
+@blog_bp.route("/<int:post_id>/delete", methods=["POST"])
+def delete_post(post_id):
+    """Delete a post and any associated uploaded files. Admin only."""
+    if not session.get("admin"):
+        return redirect(url_for("auth.login"))
+
+    try:
+        ensure_db()
+        conn = get_db_connection()
+        cur = conn.execute("SELECT media FROM posts WHERE id = ?", (post_id,))
+        row = cur.fetchone()
+        media_field = row["media"] if row else None
+
+        # delete DB row
+        conn.execute("DELETE FROM posts WHERE id = ?", (post_id,))
+        conn.commit()
+        conn.close()
+
+        # remove files from upload folder
+        if media_field:
+            upload_folder = current_app.config.get("UPLOAD_FOLDER")
+            for fname in media_field.split("||"):
+                try:
+                    path = os.path.join(upload_folder, fname)
+                    if os.path.exists(path):
+                        os.remove(path)
+                except Exception:
+                    pass
+
+        flash("Post deleted", "info")
+    except Exception:
+        try:
+            conn.close()
+        except Exception:
+            pass
+        flash("Failed to delete post", "error")
+
+    return redirect(url_for("blog.list_posts"))

@@ -190,7 +190,7 @@ def new_post():
                 filename = secure_filename(f.filename)
                 # Always save uploaded files; unsupported types will be offered as downloads.
                 # Keep client-side rendering limited to known image/video/audio types.
-                unique = f"{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{uuid.uuid4().hex}_{filename}"
+                unique = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{uuid.uuid4().hex}_{filename}"
                 dest_path = os.path.join(upload_folder, unique)
                 f.save(dest_path)
                 saved_files.append(unique)
@@ -204,7 +204,7 @@ def new_post():
         try:
             ensure_db()
             conn = get_db_connection()
-            ts = datetime.now().strftime('%d.%m.%Y %H:%M')
+            ts = datetime.now().strftime('%d.%m.%Y %H:%M:%S')
             conn.execute(
                 "INSERT INTO posts (title, content, timestamp, media, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?)",
                 (title, content, ts, media_field, latitude, longitude),

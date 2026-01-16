@@ -13,9 +13,14 @@ def create_app(config_name="development"):
     # Allow an optional config file pointed to by APP_CONFIG_FILE
     app.config.from_envvar('APP_CONFIG_FILE', silent=True)
 
-    # Ensure instance and upload folders exist
+    # Ensure instance, upload and cloud folders exist
     os.makedirs(app.instance_path, exist_ok=True)
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    # create CLOUD_FOLDER if configured
+    try:
+        os.makedirs(app.config.get('CLOUD_FOLDER'), exist_ok=True)
+    except Exception:
+        pass
 
     # Register blueprints
     app.register_blueprint(main_bp)
@@ -30,6 +35,12 @@ def create_app(config_name="development"):
     try:
         from .blueprints.blog import blog_bp
         app.register_blueprint(blog_bp)
+    except Exception:
+        pass
+
+    try:
+        from .blueprints.cloud import cloud_bp
+        app.register_blueprint(cloud_bp)
     except Exception:
         pass
 

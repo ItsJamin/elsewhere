@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Private Cloud{% endblock %}
+
+{% block content %}
+  <h2>Cloud (admin)</h2>
+
+  {% with messages = get_flashed_messages(category_filter=["error", "info"]) %}
+    {% if messages %}
+      <ul class="flashes">
+        {% for m in messages %}
+          <li>{{ m }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <form method="post" enctype="multipart/form-data">
+    <div class="mb-3">
+      <label for="files" class="form-label">Upload files</label>
+      <input id="files" name="files" type="file" multiple class="form-control" />
+    </div>
+    <div class="mb-3">
+      <button class="btn btn-primary">Upload</button>
+    </div>
+  </form>
+
+  <h3>Files</h3>
+  {% if files %}
+    <ul class="list-group">
+      {% for f in files %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          {% set parts = f.name.split('_', 2) %}
+          {% set display = parts[2] if parts|length > 2 else f.name %}
+          <div>
+            <strong>{{ display }}</strong>
+            <div class="text-muted small">{{ f.size }} bytes</div>
+          </div>
+          <div class="btn-group" role="group">
+            <a href="{{ url_for('cloud.download', filename=f.name) }}" class="btn btn-sm btn-outline-primary" download="{{ display }}">Download</a>
+            <form method="post" action="{{ url_for('cloud.delete_file') }}" style="display:inline;">
+              <input type="hidden" name="filename" value="{{ f.name }}">
+              <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete file?')">Delete</button>
+            </form>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-muted">No files yet.</p>
+  {% endif %}
+{% endblock %}

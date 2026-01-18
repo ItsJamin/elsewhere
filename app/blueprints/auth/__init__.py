@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, curren
 
 # Mount auth routes under /blog so login becomes /blog/login
 auth_bp = Blueprint("auth", __name__, template_folder="templates/auth", 
-                    #url_prefix="/blog"
+                    url_prefix="/blog"
                     )
 
 @auth_bp.route("/login", methods=["GET", "POST"])

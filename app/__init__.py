@@ -52,5 +52,14 @@ def create_app(config_name="development"):
     @app.errorhandler(403)
     def forbidden(e):
         return render_template("403.html"), 403
+    
+    from werkzeug.middleware.proxy_fix import ProxyFix
+
+    app.wsgi_app = ProxyFix(
+        app.wsgi_app,
+        x_proto=1,
+        x_host=1,
+        x_prefix=1,
+    )
 
     return app

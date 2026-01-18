@@ -6,6 +6,7 @@ class Config:
     ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "change")
 
     APPLICATION_ROOT = os.environ.get("APPLICATION_ROOT", "/")
+    SESSION_COOKIE_PATH = APPLICATION_ROOT
 
     # Uploads
     _BASE_DIR = os.path.dirname(os.path.abspath(__file__))

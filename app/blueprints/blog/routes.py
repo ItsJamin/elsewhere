@@ -104,7 +104,7 @@ def list_posts():
         ensure_db()
         conn = get_db_connection()
         cur = conn.execute(
-            "SELECT id, title, content, timestamp, media, latitude, longitude FROM posts WHERE deleted IS NULL OR deleted = 0 ORDER BY timestamp DESC"
+            "SELECT id, title, content, timestamp, media, latitude, longitude FROM posts WHERE deleted IS NULL OR deleted = 0 ORDER BY id DESC"
         )
         rows = cur.fetchall()
         for r in rows:

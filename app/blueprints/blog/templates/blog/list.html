@@ -24,7 +24,7 @@
             <div class="d-flex align-items-baseline gap-2">
               <time datetime="{{ post.timestamp }}">{{ post.timestamp }}</time>
               {% if post.latitude is not none and post.longitude is not none %}
-                <small class="text-muted">• {{ '%.5f'|format(post.latitude) }}, {{ '%.5f'|format(post.longitude) }}</small>
+                <small class="text-muted">• <a href="geo:{{post.latitude}},{{post.longitude}}">{{ '%.5f'|format(post.latitude) }}, {{ '%.5f'|format(post.longitude) }}</a></small>
               {% endif %}
             </div>
           </header>
